@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Lyrics Studio</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#101116;color:#f5f5fa;font-family:-apple-system,sans-serif;padding:20px}
+header{padding:18px 0;border-bottom:1px solid #383a45}
+h1{font-size:25px;margin:0}
+.sub{color:#a6a8b5;font-size:13px;margin-top:8px}
+.card{background:#1b1d26;border:1px solid #383a45;border-radius:16px;padding:16px;margin-top:20px}
+label{display:block;color:#bfc1cd;font-size:13px;margin:14px 0 7px}
+input,textarea,select{width:100%;padding:12px;border-radius:9px;border:1px solid #454754;background:#101116;color:white;font:inherit}
+textarea{min-height:260px;resize:vertical;line-height:1.8}
+button{border:0;border-radius:9px;padding:12px 15px;background:#8c7bff;color:white;font-size:14px;font-weight:600;margin:8px 5px 0 0}
+.secondary{background:#30323e}
+.song{padding:12px;border-bottom:1px solid #383a45;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.song button{margin:0}
+small{color:#a6a8b5}
+</style>
+</head>
+<body>
+<header>
+<h1>♫ My Lyrics Studio</h1>
+<div class="sub">あなたの歌詞を、大切に保存。</div>
+</header>
+<div class="card">
+<h3>✍️ 歌詞エディター</h3>
+<label>曲名</label>
+<input id="title" placeholder="例：Cha Cha — 小さな君へ">
+<label>バージョン</label>
+<select id="version">
+<option>制作中</option>
+<option>修正版</option>
+<option>完成版</option>
+</select>
+<label>歌詞</label>
+<textarea id="lyrics" placeholder="ここに歌詞を入力してください…"></textarea>
+<button onclick="saveSong()">保存する</button>
+<button class="secondary" onclick="newSong()">新規作成</button>
+<button class="secondary" onclick="exportSong()">歌詞を書き出す</button>
+</div>
+<div class="card">
+<h3>♫ 保存した曲</h3>
+<div id="songs"></div>
+</div>
+<script>
+let songs=[];
+let currentId=null;
+try{songs=JSON.parse(localStorage.getItem('myLyricsSongs')||'[]')}catch(e){songs=[]}
+function persist(){localStorage.setItem('myLyricsSongs',JSON.stringify(songs))}
+function render(){
+const area=document.getElementById('songs');
+area.innerHTML='';
+if(!songs.length){area.innerHTML='<small>まだ曲はありません。最初の歌詞を保存しましょう。</small>';return}
+songs.forEach(s=>{
+const row=document.createElement('div');row.className='song';
+const info=document.createElement('div');
+const name=document.createElement('strong');name.textContent=s.title||'無題';
+const br=document.createElement('br');
+const small=document.createElement('small');small.textContent=s.version;
+info.append(name,br,small);
+const edit=document.createElement('button');edit.textContent='開く';edit.className='secondary';edit.onclick=()=>loadSong(s.id);
+const del=document.createElement('button');del.textContent='削除';del.className='secondary';del.onclick=()=>deleteSong(s.id);
+row.append(info,edit,del);area.append(row);
+});
+}
+function saveSong(){
+const title=document.getElementById('title').value.trim();
+const lyrics=document.getElementById('lyrics').value;
+const version=document.getElementById('version').value;
+if(!title){alert('曲名を入力してください');return}
+if(currentId===null){currentId=Date.now();songs.unshift({id:currentId,title,lyrics,version})}
+else{const i=songs.findIndex(s=>s.id===currentId);if(i<0)songs.unshift({id:currentId,title,lyrics,version});else songs[i]={id:currentId,title,lyrics,version}}
+persist();render();alert('保存しました！');
+}
+function newSong(){currentId=null;document.getElementById('title').value='';document.getElementById('lyrics').value='';document.getElementById('version').value='制作中'}
+function loadSong(id){const s=songs.find(x=>x.id===id);if(!s)return;currentId=id;document.getElementById('title').value=s.title;document.getElementById('lyrics').value=s.lyrics;document.getElementById('version').value=s.version;window.scrollTo(0,0)}
+function deleteSong(id){if(!confirm('この曲を削除しますか？'))return;songs=songs.filter(s=>s.id!==id);persist();if(currentId===id)newSong();render()}
+function exportSong(){
+const text='曲名：'+document.getElementById('title').value+'\nバージョン：'+document.getElementById('version').value+'\n\n'+document.getElementById('lyrics').value;
+const blob=new Blob([text],{type:'text/plain;charset=utf-8'});
+const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=(document.getElementById('title').value||'歌詞')+'.txt';a.click();URL.revokeObjectURL(url);
+}
+render();
+</script>
+</body>
+</html>
