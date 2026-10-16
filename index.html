@@ -86,6 +86,7 @@ const blob=new Blob([text],{type:'text/plain;charset=utf-8'});
 const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=(document.getElementById('title').value||'歌詞')+'.txt';a.click();URL.revokeObjectURL(url);
 }
 render();
+
 </script>
 </body>
 </html>
