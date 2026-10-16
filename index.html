@@ -87,6 +87,20 @@ const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u
 }
 render();
 
+
+async function loginWithPassword(email, password) {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: email,
+    password: password
+  });
+
+  if (error) {
+    alert("ログイン失敗: " + error.message);
+    return;
+  }
+
+  alert("ログイン成功！");
+}
 </script>
 </body>
 </html>
