@@ -77,6 +77,7 @@ const version=document.getElementById('version').value;
 if(!title){alert('曲名を入力してください');return}
 if(currentId===null){currentId=Date.now();songs.unshift({id:currentId,title,lyrics,version})}
 else{const i=songs.findIndex(s=>s.id===currentId);if(i<0)songs.unshift({id:currentId,title,lyrics,version});else songs[i]={id:currentId,title,lyrics,version}}
+saveToCloud();
 persist();render();alert('保存しました！');
 }
 function newSong(){currentId=null;document.getElementById('title').value='';document.getElementById('lyrics').value='';document.getElementById('version').value='制作中'}
@@ -102,6 +103,25 @@ async function loginWithPassword(email, password) {
   }
 
   alert("ログイン成功！");
+}
+async function saveToCloud(){
+  try {
+    const song = songs.find(s => s.id === currentId);
+    if (!song) return;
+    const response = await fetch(SUPABASE_URL + '/rest/v1/songs', {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        Prefer: 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify(song)
+    });
+    if (!response.ok) console.error('クラウド保存エラー:', await response.text());
+  } catch (error) {
+    console.error('クラウド保存エラー:', error);
+  }
 }
 </script>
 </body>
