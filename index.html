@@ -21,6 +21,7 @@ button{border:0;border-radius:9px;padding:12px 15px;background:#8c7bff;color:whi
 .song button{margin:0}
 small{color:#a6a8b5}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
 <header>
@@ -51,7 +52,8 @@ small{color:#a6a8b5}
 <script>
   const SUPABASE_URL = 'https://girinjiepqscdcpafbji.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_i1iA72DCsdTT8po4hv0UHw_nU9DPtmR';
-let songs=[];
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  let songs=[];
 let currentId=null;
 try{songs=JSON.parse(localStorage.getItem('myLyricsSongs')||'[]')}catch(e){songs=[]}
 function persist(){localStorage.setItem('myLyricsSongs',JSON.stringify(songs))}
